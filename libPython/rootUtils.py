@@ -1,5 +1,6 @@
 import ROOT as rt
 import math
+import ctypes
 from fitUtils import *
 #from fitSimultaneousUtils import *
 
@@ -64,8 +65,10 @@ def makePassFailHistograms( sample, flag, bindef, var ):
 
         bin1 = 1
         bin2 = hPass[ib].GetXaxis().GetNbins()
-        epass = rt.Double(-1.0)
-        efail = rt.Double(-1.0)
+        epass = ctypes.c_double(-1.0)
+        efail = ctypes.c_double(-1.0)
+        # epass = ctypes.c_double(-1.0)
+        # efail = ctypes.c_double(-1.0)
         passI = hPass[ib].IntegralAndError(bin1,bin2,epass)
         failI = hFail[ib].IntegralAndError(bin1,bin2,efail)
         eff   = 0
@@ -91,6 +94,10 @@ def histPlotter( filename, tnpBin, plotDir ):
 def computeEffi( n1,n2,e1,e2):
     effout = []
     eff   = n1/(n1+n2)
+    if not type(e1) is float:
+        e1 = e1.value
+    if not type(e2) is float:
+        e2 = e2.value
     e_eff = 1/(n1+n2)*math.sqrt(e1*e1*n2*n2+e2*e2*n1*n1)/(n1+n2)
     if e_eff < 0.001 : e_eff = 0.001
 
@@ -111,8 +118,8 @@ def getAllEffi( info, bindef ):
         #bin2 = hP.GetXaxis().GetNbins()
         bin1 = 11
         bin2 = 70
-        eP = rt.Double(-1.0)
-        eF = rt.Double(-1.0)
+        eP = ctypes.c_double(-1.0)
+        eF = ctypes.c_double(-1.0)
         nP = hP.IntegralAndError(bin1,bin2,eP)
         nF = hF.IntegralAndError(bin1,bin2,eF)
 
@@ -128,8 +135,8 @@ def getAllEffi( info, bindef ):
       #  bin2 = hP.GetXaxis().GetNbins()
         bin1 = 11
         bin2 = 70
-        eP = rt.Double(-1.0)
-        eF = rt.Double(-1.0)
+        eP = ctypes.c_double(-1.0)
+        eF = ctypes.c_double(-1.0)
         nP = hP.IntegralAndError(bin1,bin2,eP)
         nF = hF.IntegralAndError(bin1,bin2,eF)
 
@@ -145,8 +152,8 @@ def getAllEffi( info, bindef ):
         #bin2 = hP.GetXaxis().GetNbins()
         bin1 = 11
         bin2 = 70
-        eP = rt.Double(-1.0)
-        eF = rt.Double(-1.0)
+        eP = ctypes.c_double(-1.0)
+        eF = ctypes.c_double(-1.0)
         nP = hP.IntegralAndError(bin1,bin2,eP)
         nF = hF.IntegralAndError(bin1,bin2,eF)
 
