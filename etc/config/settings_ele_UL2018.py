@@ -1,26 +1,13 @@
 #############################################################
 ########## General settings
 #############################################################
-# flag to be Tested
-cutpass80 = '(( abs(probe_sc_eta) < 0.8 && probe_Ele_nonTrigMVA > %f ) ||  ( abs(probe_sc_eta) > 0.8 && abs(probe_sc_eta) < 1.479&& probe_Ele_nonTrigMVA > %f ) || ( abs(probe_sc_eta) > 1.479 && probe_Ele_nonTrigMVA > %f ) )' % (0.967083,0.929117,0.726311)
-cutpass90 = '(( abs(probe_sc_eta) < 0.8 && probe_Ele_nonTrigMVA > %f ) ||  ( abs(probe_sc_eta) > 0.8 && abs(probe_sc_eta) < 1.479&& probe_Ele_nonTrigMVA > %f ) || ( abs(probe_sc_eta) > 1.479 && probe_Ele_nonTrigMVA > %f ) )' % (0.913286,0.805013,0.358969)
 
 # flag to be Tested
 flags = {
-    'passingVeto94XV2'    : '(passingVeto94XV2   == 1)',
-    'passingLoose94XV2'   : '(passingLoose94XV2  == 1)',
-    'passingMedium94XV2'  : '(passingMedium94XV2 == 1)',
-    'passingTight94XV2'   : '(passingTight94XV2  == 1)',
-    'passingMVA94Xwp80isoV2' : '(passingMVA94Xwp80isoV2 == 1)',
-    'passingMVA94Xwp90isoV2' : '(passingMVA94Xwp90isoV2 == 1)',
-    'passingMVA94Xwp80noisoV2' : '(passingMVA94Xwp80noisoV2 == 1)',
-    'passingMVA94Xwp90noisoV2' : '(passingMVA94Xwp90noisoV2 == 1)',
-    'passingMVA94XwpLisoV2'    : '(passingMVA94XwpLisoV2 == 1)',
-    'passingMVA94XwpLnoisoV2'  : '(passingMVA94XwpLnoisoV2 == 1)',
-    'passingMVA94XwpHZZisoV2'  : '(passingMVA94XwpHZZisoV2 == 1)',
-    }
+    'trigger' : '(passhltEG175HEFilter||passhltEle32WPTightGsfTrackIsoFilter)',
+}
 
-baseOutDir = 'results/UL2018/tnpEleID/'
+baseOutDir = 'results/UL2018/tnpHLT/'
 
 #############################################################
 ########## samples definition  - preparing the samples
@@ -28,13 +15,13 @@ baseOutDir = 'results/UL2018/tnpEleID/'
 ### samples are defined in etc/inputs/tnpSampleDef.py
 ### not: you can setup another sampleDef File in inputs
 import etc.inputs.tnpSampleDef as tnpSamples
-tnpTreeDir = 'tnpEleIDs'
+tnpTreeDir = 'tnpEleTrig'
 
 samplesDef = {
     'data'   : tnpSamples.UL2018['data_Run2018A'].clone(),
-    'mcNom'  : tnpSamples.UL2018['DY_amcatnloext'].clone(),
-    'mcAlt'  : tnpSamples.UL2018['DY_madgraph'].clone(),
-    'tagSel' : tnpSamples.UL2018['DY_amcatnloext'].clone(),
+    'mcNom'  : tnpSamples.UL2018['DYToLL_LO'].clone(),
+    'mcAlt'  : tnpSamples.UL2018['DYToLL_NLO'].clone(),
+    'tagSel' : tnpSamples.UL2018['DYToLL_LO'].clone(),
 }
 
 ## can add data sample easily
@@ -56,47 +43,53 @@ if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
-    samplesDef['tagSel'].rename('mcAltSel_DY_amcatnloext')
+    samplesDef['tagSel'].rename('mcAltSel_DY_madgraph')
     samplesDef['tagSel'].set_cut('tag_Ele_pt > 37') #canceled non trig MVA cut
 
+## set MC weight, simple way (use tree weight) 
+#weightName = 'totWeight'
+#if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
+#if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
+#if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 
 ## set MC weight, can use several pileup rw for different data taking periods
 weightName = 'weights_2018_runABCD.totWeight'
 if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
-if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_puTree('/eos/cms/store/group/phys_egamma/asroy/Tag-and-Probe_Tree/UL2018_MINIAOD_Nm1/PU_Trees/DY_amcatnloext_ele.pu.puTree.root')
-if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_puTree('/eos/cms/store/group/phys_egamma/asroy/Tag-and-Probe_Tree/UL2018_MINIAOD_Nm1/PU_Trees/DY_madgraph_ele.pu.puTree.root')
-if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree('/eos/cms/store/group/phys_egamma/asroy/Tag-and-Probe_Tree/UL2018_MINIAOD_Nm1/PU_Trees/DY_amcatnloext_ele.pu.puTree.root')
+if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_puTree('/eos/cms/store/group/phys_egamma/asroy/Tag-and-Probe_Tree/UL2018_MINIAOD_Nm1/PU_Trees/DY_madgraph_ele.pu.puTree.root')
+if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_puTree('/eos/cms/store/group/phys_egamma/asroy/Tag-and-Probe_Tree/UL2018_MINIAOD_Nm1/PU_Trees/DY_amcatnloext_ele.pu.puTree.root')
+if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree('/eos/cms/store/group/phys_egamma/asroy/Tag-and-Probe_Tree/UL2018_MINIAOD_Nm1/PU_Trees/DY_madgraph_ele.pu.puTree.root')
 
 
 #############################################################
 ########## bining definition  [can be nD bining]
 #############################################################
 biningDef = [
-   { 'var' : 'el_sc_eta' , 'type': 'float', 'bins': [-2.5,-2.0,-1.566,-1.4442, -0.8, 0.0, 0.8, 1.4442, 1.566, 2.0, 2.5] },
-   { 'var' : 'el_pt' , 'type': 'float', 'bins': [10,20,35,50,100,200,500] },
-
-
+    { 'var' : 'el_sc_eta' , 'type': 'float', 'bins': [-2.5,-2.0,-1.566,-1.4442, -0.8, 0.0, 0.8, 1.4442, 1.566, 2.0, 2.5] },
+    { 'var' : 'el_pt' , 'type': 'float', 'bins': [32,50,80,110,150,200,500] },
 ]
 
 #############################################################
 ########## Cuts definition for all samples
 #############################################################
 ### cut
-cutBase   = 'tag_Ele_pt > 35 && abs(tag_sc_eta) < 2.17 && el_q*tag_Ele_q < 0'
+cutBase   = '(passingCutBasedLoose94XV2) && tag_Ele_pt > 35 && abs(tag_sc_eta) < 2.17 && el_q*tag_Ele_q < 0'
+cutBase  += "&&(" 
+# tag ele barrel impact paramater selection
+cutBase  += "(abs(tag_sc_eta)<1.4442 && abs(tag_Ele_dxy) < 0.05 && abs(tag_Ele_dz) < 0.1)"
+# tag ele endcap impact paramater selection
+cutBase  += "|| (abs(tag_sc_eta)>1.5660 && abs(tag_Ele_dxy) < 0.1 && abs(tag_Ele_dz) < 0.2)"
+# probe ele barrel impact paramater selection
+cutBase  += "|| (abs(el_sc_eta)<1.4442 && abs(el_dxy) < 0.05 && abs(el_dz) < 0.1)"
+# probe ele endcap impact paramater selection
+cutBase  += "|| (abs(el_sc_eta)>1.5660 && abs(el_dxy) < 0.1 && abs(el_dz) < 0.2)"
+cutBase  += ")" 
 
-additionalCuts = { 
-    0 : 'tag_Ele_trigMVA > 0.92 ',
-    1 : 'tag_Ele_trigMVA > 0.92 ',
-    2 : 'tag_Ele_trigMVA > 0.92 ',
-    3 : 'tag_Ele_trigMVA > 0.92 ',
-    4 : 'tag_Ele_trigMVA > 0.92 ',
-    5 : 'tag_Ele_trigMVA > 0.92 ',
-    6 : 'tag_Ele_trigMVA > 0.92 ',
-    7 : 'tag_Ele_trigMVA > 0.92 ',
-    8 : 'tag_Ele_trigMVA > 0.92 ',
-    9 : 'tag_Ele_trigMVA > 0.92 '
+# can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
+#LS: we removed the met cuts cause JEC not ready for UL2018
+additionalCuts = {
+#    0 : 'tag_Ele_trigMVA > 0.92 ',
 }
 
 #### or remove any additional cut (default)
@@ -113,8 +106,10 @@ tnpParNomFit = [
     ]
 
 tnpParAltSigFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,1.2,3.5]" ,'nP[3,-5,5]',"sigmaP_2[1.5,0.5,6.0]","sosP[1,0.5,5.0]",
-    "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,15.0]","alphaF[2.0,1.2,3.5]",'nF[3,-5,5]',"sigmaF_2[2.0,0.5,6.0]","sosF[1,0.5,5.0]",
+    "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,0.01,5.0]" ,'nP[3,-5,5]',"sigmaP_2[1.5,0.5,6.0]","sosP[1,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,15.0]","alphaF[2.0,0.01,5.0]",'nF[3,-5,5]',"sigmaF_2[2.0,0.5,6.0]","sosF[1,0.5,5.0]",
+#    "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[-2.0,-3.5,-0.01]" ,'nP[3,-5,5]',"sigmaP_2[1.5,0.5,6.0]","sosP[1,0.5,5.0]",
+#    "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,15.0]","alphaF[-2.0,-3.5,-0.01]",'nF[3,-5,5]',"sigmaF_2[2.0,0.5,6.0]","sosF[1,0.5,5.0]",
     "acmsP[60.,50.,75.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[90.0]",
     "acmsF[60.,50.,75.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.005, 1]","peakF[90.0]",
     ]
@@ -126,11 +121,11 @@ tnpParAltSigFit_addGaus = [
     "acmsP[60.,50.,75.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[90.0]",
     "acmsF[60.,50.,85.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.005, 1]","peakF[90.0]",
     ]
-         
+
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
     "alphaP[0.,-5.,5.]",
     "alphaF[0.,-5.,5.]",
     ]
-        
+
